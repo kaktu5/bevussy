@@ -1,0 +1,10 @@
+*
+!.cargo/config.toml
+!src/
+!src/**
+!.gitignore
+!Cargo.lock
+!Cargo.toml
+!flake.lock
+!flake.nix
+!treefmt.nix
