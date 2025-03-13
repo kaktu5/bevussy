@@ -25,4 +25,5 @@ strip = "symbols"
 
 [dependencies]
 bevy = {features = ["wayland"], version = "0.15.3"}
+bevy-inspector-egui = "0.29.1"
 log = {features = ["max_level_debug", "release_max_level_warn"], version = "0.4.26"}
