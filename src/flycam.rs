@@ -3,6 +3,7 @@ use bevy::{
     prelude::*,
     window::{CursorGrabMode, CursorOptions, PrimaryWindow},
 };
+use serde::{Deserialize, Serialize};
 
 pub struct FlyCamPlugin;
 
@@ -17,7 +18,7 @@ impl Plugin for FlyCamPlugin {
 #[derive(Component)]
 pub struct FlyCam;
 
-#[derive(Resource)]
+#[derive(Resource, Deserialize, Serialize)]
 pub struct KeyBinds {
     pub forward: KeyCode,
     pub backward: KeyCode,
@@ -42,7 +43,7 @@ impl Default for KeyBinds {
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Deserialize, Serialize)]
 pub struct Settings {
     pub sensitivity: f32,
     pub speed: f32,

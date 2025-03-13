@@ -1,5 +1,7 @@
 *
 !.cargo/config.toml
+!res/
+!res/**
 !src/
 !src/**
 !.gitignore

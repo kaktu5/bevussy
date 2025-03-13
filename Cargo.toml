@@ -24,6 +24,8 @@ opt-level = 3
 strip = "symbols"
 
 [dependencies]
-bevy = {features = ["wayland"], version = "0.15.3"}
+bevy = {features = ["serialize", "wayland"], version = "0.15.3"}
 bevy-inspector-egui = "0.29.1"
 log = {features = ["max_level_debug", "release_max_level_warn"], version = "0.4.26"}
+ron = "0.8.1"
+serde = {features = ["derive"], version = "1.0.219"}
