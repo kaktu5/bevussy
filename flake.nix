@@ -13,18 +13,16 @@
     rust-overlay,
     treefmt-nix,
   }: let
-    forEachSystem = nixpkgs.lib.genAttrs [
-      "aarch64-darwin"
-      "aarch64-linux"
-      "x86_64-darwin"
-      "x86_64-linux"
-    ];
-    mkPkgs = system: (import nixpkgs {
-      inherit system;
-      overlays = [(import rust-overlay)];
-    });
+    forEachSystem = nixpkgs.lib.genAttrs ["aarch64-linux" "x86_64-linux"];
+    mkPkgs = system:
+      (import nixpkgs {
+        inherit system;
+        overlays = [(import rust-overlay)];
+      })
+      .pkgsMusl;
     mkToolchain = pkgs: (pkgs.rust-bin.selectLatestNightlyWith (toolchain:
       toolchain.default.override {
+        targets = ["aarch64-unknown-linux-musl" "x86_64-unknown-linux-musl"];
         extensions = ["rustc-codegen-cranelift-preview"];
       }));
   in {
@@ -41,20 +39,8 @@
           name = "bevussy";
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
-          nativeBuildInputs = [
-            (mkToolchain pkgs)
-            pkgs.mold
-            pkgs.pkg-config
-          ];
-          buildInputs = with pkgs; [
-            alsa-lib
-            clang
-            libxkbcommon
-            lld
-            udev
-            vulkan-loader
-            wayland
-          ];
+          nativeBuildInputs = [(mkToolchain pkgs)] ++ (with pkgs; [glibc mold musl pkg-config]);
+          buildInputs = with pkgs; [alsa-lib-with-plugins libxkbcommon udev vulkan-loader pkgsMusl.wayland];
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
         };
     });
@@ -65,7 +51,13 @@
         inherit (self.packages.${system}.bevussy) LD_LIBRARY_PATH buildInputs nativeBuildInputs;
       });
     formatter = forEachSystem (
-      system: let pkgs = mkPkgs system; in (treefmt-nix.lib.evalModule pkgs (import ./treefmt.nix {inherit pkgs;})).config.build.wrapper
+      system: let
+        pkgs = mkPkgs system;
+      in
+        (treefmt-nix.lib.evalModule pkgs (import ./treefmt.nix {inherit pkgs;}))
+        .config
+        .build
+        .wrapper
     );
   };
 }
