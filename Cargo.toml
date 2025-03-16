@@ -10,6 +10,7 @@ bevy = {features = ["serialize", "wayland"], version = "0.15.3"}
 bevy-inspector-egui = "0.30.0"
 bevy_rapier3d = {features = ["debug-render-3d", "parallel", "simd-nightly"], version = "0.29.0"}
 log = {features = ["max_level_debug", "release_max_level_warn"], version = "0.4.26"}
+rand = "0.9.0"
 ron = "0.8.1"
 serde = {features = ["derive"], version = "1.0.219"}
 

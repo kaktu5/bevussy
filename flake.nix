@@ -14,15 +14,12 @@
     treefmt-nix,
   }: let
     forEachSystem = nixpkgs.lib.genAttrs ["aarch64-linux" "x86_64-linux"];
-    mkPkgs = system:
-      (import nixpkgs {
-        inherit system;
-        overlays = [(import rust-overlay)];
-      })
-      .pkgsMusl;
+    mkPkgs = system: (import nixpkgs {
+      inherit system;
+      overlays = [(import rust-overlay)];
+    });
     mkToolchain = pkgs: (pkgs.rust-bin.selectLatestNightlyWith (toolchain:
       toolchain.default.override {
-        targets = ["aarch64-unknown-linux-musl" "x86_64-unknown-linux-musl"];
         extensions = ["rustc-codegen-cranelift-preview"];
       }));
   in {
@@ -39,8 +36,10 @@
           name = "bevussy";
           src = ./.;
           cargoLock.lockFile = ./Cargo.lock;
-          nativeBuildInputs = [(mkToolchain pkgs)] ++ (with pkgs; [glibc mold musl pkg-config]);
-          buildInputs = with pkgs; [alsa-lib-with-plugins libxkbcommon udev vulkan-loader pkgsMusl.wayland];
+          nativeBuildInputs =
+            [(mkToolchain pkgs)]
+            ++ (with pkgs; [cargo-watch mold pkg-config]);
+          buildInputs = with pkgs; [alsa-lib-with-plugins libxkbcommon udev vulkan-loader wayland];
           LD_LIBRARY_PATH = pkgs.lib.makeLibraryPath buildInputs;
         };
     });

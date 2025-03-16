@@ -1,6 +1,7 @@
 mod flycam;
+mod voxels;
 
-use crate::flycam::FlyCamPlugin;
+use crate::{flycam::FlyCamPlugin, voxels::voxel_engine::VoxelEnginePlugin};
 use bevy::{
     prelude::*,
     window::{PresentMode, WindowMode},
@@ -10,13 +11,14 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                mode: WindowMode::BorderlessFullscreen(MonitorSelection::Current),
+                // mode: WindowMode::BorderlessFullscreen(MonitorSelection::Current),
+                mode: WindowMode::Windowed,
                 present_mode: PresentMode::Immediate,
                 ..default()
             }),
             ..default()
         }))
-        .add_plugins(FlyCamPlugin)
+        .add_plugins((FlyCamPlugin, VoxelEnginePlugin))
         .insert_resource(ClearColor(Color::srgb_u8(122, 133, 255)))
         .add_systems(Startup, setup)
         .run();

@@ -6,8 +6,11 @@
 !src/
 !src/**
 !.gitignore
+!CREDITS.md
 !Cargo.lock
 !Cargo.toml
+!LICENSE
+!README.md
 !flake.lock
 !flake.nix
 !treefmt.nix
