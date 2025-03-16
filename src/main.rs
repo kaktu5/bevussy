@@ -1,5 +1,3 @@
-#![feature(stmt_expr_attributes)]
-
 mod systems;
 mod utils;
 

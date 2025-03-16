@@ -1,3 +1,5 @@
+#![allow(clippy::redundant_closure_call)]
+
 use crate::error_and_exit;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -109,8 +111,7 @@ fn movement(
         _ => {}
     });
 
-    transform.translation += #[allow(clippy::redundant_closure_call)]
-    (|vec: Vec2| Vec3::new(vec.x, 0., vec.y))(
+    transform.translation += (|vec: Vec2| Vec3::new(vec.x, 0., vec.y))(
         velocity.normalize_or_zero() * Vec2::splat(settings.movement_speed * time.delta_secs()),
     );
 }
