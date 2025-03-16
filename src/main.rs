@@ -11,8 +11,7 @@ fn main() {
     App::new()
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
-                // mode: WindowMode::BorderlessFullscreen(MonitorSelection::Current),
-                mode: WindowMode::Windowed,
+                mode: WindowMode::BorderlessFullscreen(MonitorSelection::Current),
                 present_mode: PresentMode::Immediate,
                 ..default()
             }),
