@@ -1,7 +1,7 @@
-mod flycam;
-mod voxels;
+mod systems;
 
-use crate::{flycam::FlyCamPlugin, voxels::voxel_engine::VoxelEnginePlugin};
+#[allow(unused_imports)]
+use crate::systems::{flycam::FlyCamPlugin, player::PlayerPlugin};
 use bevy::{
     prelude::*,
     window::{PresentMode, WindowMode},
@@ -17,7 +17,8 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugins((FlyCamPlugin, VoxelEnginePlugin))
+        // .add_plugins(FlyCamPlugin)
+        .add_plugins(PlayerPlugin)
         .insert_resource(ClearColor(Color::srgb_u8(122, 133, 255)))
         .add_systems(Startup, setup)
         .run();
@@ -29,7 +30,7 @@ fn setup(
     mut materials: ResMut<Assets<StandardMaterial>>,
 ) {
     commands.spawn((
-        Mesh3d(meshes.add(Circle::new(128.0))),
+        Mesh3d(meshes.add(Circle::new(32.))),
         MeshMaterial3d(materials.add(Color::WHITE)),
         Transform::from_rotation(Quat::from_rotation_x(-std::f32::consts::FRAC_PI_2)),
     ));
