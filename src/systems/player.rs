@@ -90,15 +90,17 @@ fn movement(
     time: Res<Time>,
     mut players: Query<(&Player, &Id, &mut Transform)>,
 ) {
+    let key_binds = &settings.key_binds;
     let (_, _, mut transform) = players
         .iter_mut()
         .find(|(_, id, _)| id.0 == 69)
         .unwrap_or_else(|| error_and_exit!("Failed to get `player` with id {}", 69));
-    let key_binds = &settings.key_binds;
-    let mut velocity = Vec3::ZERO;
+
     let local_z = transform.local_z();
     let forward = -Vec3::new(local_z.x, 0., local_z.z);
     let right = Vec3::new(local_z.z, 0., -local_z.x);
+
+    let mut velocity = Vec3::ZERO;
     keys.get_pressed().for_each(|key| match *key {
         key if key == key_binds.forward => velocity += forward,
         key if key == key_binds.backward => velocity -= forward,
@@ -106,6 +108,6 @@ fn movement(
         key if key == key_binds.left => velocity -= right,
         _ => {}
     });
-    velocity = velocity.normalize_or_zero();
-    transform.translation += velocity * Vec3::splat(10. * time.delta_secs());
+
+    transform.translation += velocity.normalize_or_zero() * Vec3::splat(10. * time.delta_secs());
 }
