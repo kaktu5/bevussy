@@ -54,7 +54,7 @@ impl Default for Settings {
     fn default() -> Self {
         Self {
             initial_position: Vec3::new(0., 8., 0.),
-            movement_speed: 12.,
+            movement_speed: 32.,
             movement_acceleration: 8.,
             sensitivity: 0.00005,
             key_binds: KeyBinds::default(),
@@ -97,10 +97,10 @@ fn movement(
         .unwrap_or_else(|| error_and_exit!("Failed to get `player` with id {}", 69));
 
     let local_z = transform.local_z();
-    let forward = -Vec3::new(local_z.x, 0., local_z.z);
-    let right = Vec3::new(local_z.z, 0., -local_z.x);
+    let forward = -Vec2::new(local_z.x, local_z.z);
+    let right = Vec2::new(local_z.z, -local_z.x);
 
-    let mut velocity = Vec3::ZERO;
+    let mut velocity = Vec2::ZERO;
     keys.get_pressed().for_each(|key| match *key {
         key if key == key_binds.forward => velocity += forward,
         key if key == key_binds.backward => velocity -= forward,
@@ -109,5 +109,8 @@ fn movement(
         _ => {}
     });
 
-    transform.translation += velocity.normalize_or_zero() * Vec3::splat(10. * time.delta_secs());
+    transform.translation += #[allow(clippy::redundant_closure_call)]
+    (|vec: Vec2| Vec3::new(vec.x, 0., vec.y))(
+        velocity.normalize_or_zero() * Vec2::splat(settings.movement_speed * time.delta_secs()),
+    );
 }
