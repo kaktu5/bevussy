@@ -1,4 +1,5 @@
 mod systems;
+mod utils;
 
 #[allow(unused_imports)]
 use crate::systems::{flycam::FlyCamPlugin, player::PlayerPlugin};

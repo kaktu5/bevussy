@@ -1,3 +1,4 @@
+use crate::error_and_exit;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
 use serde::{Deserialize, Serialize};
@@ -8,11 +9,15 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Settings>()
             .add_systems(Startup, setup)
-            .add_systems(Update, update);
+            .add_systems(Update, movement);
     }
 }
 
+#[derive(Component, Default)]
+struct Id(u8);
+
 #[derive(Component)]
+#[require(Id)]
 struct Player;
 
 #[derive(Resource, Deserialize, Serialize)]
@@ -63,6 +68,7 @@ fn setup(mut commands: Commands, settings: Res<Settings>) {
             RigidBody::KinematicPositionBased,
             Camera3d::default(),
             Player,
+            Id(69),
         ))
         .insert(Collider::ball(0.5))
         .insert(Transform::from_translation(settings.initial_position))
@@ -78,8 +84,28 @@ fn setup(mut commands: Commands, settings: Res<Settings>) {
         });
 }
 
-fn update(time: Res<Time>, mut players: Query<(&Player, &mut Transform)>) {
-    players.iter_mut().for_each(|(_, mut player)| {
-        player.translation += Vec3::new(1., -5., -1.) * time.delta_secs();
+fn movement(
+    keys: Res<ButtonInput<KeyCode>>,
+    settings: Res<Settings>,
+    time: Res<Time>,
+    mut players: Query<(&Player, &Id, &mut Transform)>,
+) {
+    let (_, _, mut transform) = players
+        .iter_mut()
+        .find(|(_, id, _)| id.0 == 69)
+        .unwrap_or_else(|| error_and_exit!("Failed to get `player` with id {}", 69));
+    let key_binds = &settings.key_binds;
+    let mut velocity = Vec3::ZERO;
+    let local_z = transform.local_z();
+    let forward = -Vec3::new(local_z.x, 0., local_z.z);
+    let right = Vec3::new(local_z.z, 0., -local_z.x);
+    keys.get_pressed().for_each(|key| match *key {
+        key if key == key_binds.forward => velocity += forward,
+        key if key == key_binds.backward => velocity -= forward,
+        key if key == key_binds.right => velocity += right,
+        key if key == key_binds.left => velocity -= right,
+        _ => {}
     });
+    velocity = velocity.normalize_or_zero();
+    transform.translation += velocity * Vec3::splat(10. * time.delta_secs());
 }
