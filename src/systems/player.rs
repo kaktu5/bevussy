@@ -1,5 +1,3 @@
-#![allow(clippy::redundant_closure_call)]
-
 use crate::error_and_exit;
 use bevy::prelude::*;
 use bevy_rapier3d::prelude::*;
@@ -15,11 +13,7 @@ impl Plugin for PlayerPlugin {
     }
 }
 
-#[derive(Component, Default)]
-struct Id(u8);
-
 #[derive(Component)]
-#[require(Id)]
 struct Player;
 
 #[derive(Resource, Deserialize, Serialize)]
@@ -70,7 +64,6 @@ fn setup(mut commands: Commands, settings: Res<Settings>) {
             RigidBody::KinematicPositionBased,
             Camera3d::default(),
             Player,
-            Id(69),
         ))
         .insert(Collider::ball(0.5))
         .insert(Transform::from_translation(settings.initial_position))
@@ -90,28 +83,31 @@ fn movement(
     keys: Res<ButtonInput<KeyCode>>,
     settings: Res<Settings>,
     time: Res<Time>,
-    mut players: Query<(&Player, &Id, &mut Transform)>,
+    mut players: Query<&mut Transform, With<Player>>,
 ) {
     let key_binds = &settings.key_binds;
-    let (_, _, mut transform) = players
+    let mut transform = players
         .iter_mut()
-        .find(|(_, id, _)| id.0 == 69)
-        .unwrap_or_else(|| error_and_exit!("Failed to get `player` with id {}", 69));
+        .next()
+        .unwrap_or_else(|| error_and_exit!("Failed to get `player`"));
 
-    let local_z = transform.local_z();
-    let forward = -Vec2::new(local_z.x, local_z.z);
-    let right = Vec2::new(local_z.z, -local_z.x);
-
-    let mut velocity = Vec2::ZERO;
+    let mut input = Vec2::ZERO;
     keys.get_pressed().for_each(|key| match *key {
-        key if key == key_binds.forward => velocity += forward,
-        key if key == key_binds.backward => velocity -= forward,
-        key if key == key_binds.right => velocity += right,
-        key if key == key_binds.left => velocity -= right,
+        key if key == key_binds.forward => input.x += 1.,
+        key if key == key_binds.backward => input.x -= 1.,
+        key if key == key_binds.right => input.y += 1.,
+        key if key == key_binds.left => input.y -= 1.,
         _ => {}
     });
 
-    transform.translation += (|vec: Vec2| Vec3::new(vec.x, 0., vec.y))(
-        velocity.normalize_or_zero() * Vec2::splat(settings.movement_speed * time.delta_secs()),
-    );
+    let velocity = {
+        let local_z = transform.local_z();
+        let forward = -Vec2::new(local_z.x, local_z.z);
+        let right = Vec2::new(local_z.z, -local_z.x);
+        (forward * input.x + right * input.y).normalize_or_zero()
+            * settings.movement_speed
+            * time.delta_secs()
+    };
+
+    transform.translation += Vec3::new(velocity.x, 0., velocity.y);
 }
