@@ -9,7 +9,7 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<Settings>()
             .add_systems(Startup, setup)
-            .add_systems(Update, movement);
+            .add_systems(Update, update);
     }
 }
 
@@ -49,7 +49,7 @@ struct Settings {
 impl Default for Settings {
     fn default() -> Self {
         Self {
-            initial_position: Vec3::new(0., 8., 0.),
+            initial_position: Vec3::new(0., 2., 0.),
             movement_speed: 32.,
             movement_acceleration: 8.,
             sensitivity: 0.00005,
@@ -59,27 +59,21 @@ impl Default for Settings {
 }
 
 fn setup(mut commands: Commands, settings: Res<Settings>) {
-    commands
-        .spawn((
-            RigidBody::KinematicPositionBased,
-            Camera3d::default(),
-            Player,
-        ))
-        .insert(Collider::ball(0.5))
-        .insert(Transform::from_translation(settings.initial_position))
-        .insert(KinematicCharacterController {
-            autostep: Some(CharacterAutostep {
-                include_dynamic_bodies: true,
-                max_height: CharacterLength::Relative(0.25),
-                min_width: CharacterLength::Relative(0.25),
-            }),
-            max_slope_climb_angle: 45_f32.to_radians(),
-            min_slope_slide_angle: 30_f32.to_radians(),
+    commands.spawn((
+        KinematicCharacterController {
+            apply_impulse_to_dynamic_bodies: true,
             ..default()
-        });
+        },
+        // Collider::capsule_y(1., 0.5),
+        Collider::ball(1.),
+        RigidBody::KinematicPositionBased,
+        Transform::from_translation(settings.initial_position),
+        Camera3d::default(),
+        Player,
+    ));
 }
 
-fn movement(
+fn update(
     keys: Res<ButtonInput<KeyCode>>,
     settings: Res<Settings>,
     time: Res<Time>,

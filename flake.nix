@@ -19,9 +19,7 @@
       overlays = [(import rust-overlay)];
     });
     mkToolchain = pkgs: (pkgs.rust-bin.selectLatestNightlyWith (toolchain:
-      toolchain.default.override {
-        extensions = ["rustc-codegen-cranelift-preview"];
-      }));
+        toolchain.default.override {extensions = ["rustc-codegen-cranelift-preview"];}));
   in {
     packages = forEachSystem (system: let
       pkgs = mkPkgs system;
